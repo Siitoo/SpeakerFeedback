@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REGISTER_USER = 0;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private TextView textView;
+    private TextView num_users;
     private String userId;
     private ListenerRegistration roomRegistration;
     private ListenerRegistration usersRegistration;
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textView = findViewById(R.id.textView);
+        num_users = findViewById(R.id.num_users_view);
         getOrRegisterUser();
 
     }
@@ -61,12 +61,13 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("SpeakerFeedback", "Error al rebre usuaris dins d'un room", e);
                 return;
             }
-            //textView.setText(String.format("Numusers: %d", documentSnapshots.size()));
+            num_users.setText(String.format("Num users: %d", documentSnapshots.size()));
+
             String nomUsuaris = "";
             for(DocumentSnapshot doc : documentSnapshots){
                 nomUsuaris += doc.getString("name") + "\n";
             }
-            textView.setText(nomUsuaris);
+            //num_users.setText(nomUsuaris);
         }
     };
 
