@@ -25,6 +25,19 @@ public class Poll {
         return options;
     }
 
+    public String getOptionsAsString()
+    {
+        //Així se sument molts strings a Java
+        StringBuilder b = new StringBuilder();
+
+        for(String op : options)
+        {
+            b.append(op);
+            b.append("\n");
+        }
+        return b.toString();
+    }
+
     public void setOptions(List<String> options) {
         this.options = options;
     }
