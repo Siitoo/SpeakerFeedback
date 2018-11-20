@@ -22,7 +22,9 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,8 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private TextView num_users;
     private String userId;
-    private ListenerRegistration roomRegistration;
-    private ListenerRegistration usersRegistration;
+    private List<Poll> polls;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,22 +74,38 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private EventListener<QuerySnapshot> pollsListener = new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.e("SpeakerFeedback", "Error al rebre la llista de polls", e);
+                return;
+            }
+            polls = new ArrayList<>();
+            for(DocumentSnapshot doc : documentSnapshots) {
+                Poll poll = doc.toObject(Poll.class);
+                polls.add(poll);
+            }
+            Log.i("SpeakerFeedback", String.format("He carregat %d polls", polls.size()));
+             //TODO: Avisar l'adaptador
+        }
+    };
+
     @Override
     protected void onStart() {
-        roomRegistration = db.collection("rooms").document("testroom")
-                .addSnapshotListener(roomListener);
-        usersRegistration = db.collection("users").whereEqualTo("room", "testroom")
-                .addSnapshotListener(userListener);
+        db.collection("rooms").document("testroom")
+                .addSnapshotListener(this,roomListener);
+
+        db.collection("users").whereEqualTo("room", "testroom")
+                .addSnapshotListener(this,userListener);
+
+        db.collection("rooms").document("testroom").collection("polls")
+                .addSnapshotListener(this, pollsListener);
 
         super.onStart();
     }
 
-    @Override
-    protected void onStop() {
-        roomRegistration.remove();
-        usersRegistration.remove();
-        super.onStop();
-    }
+
 
     @Override
     protected void onDestroy() {
