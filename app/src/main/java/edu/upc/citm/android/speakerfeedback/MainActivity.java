@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-   private EventListener<DocumentSnapshot> roomListener =  new EventListener<DocumentSnapshot>() {
+    private EventListener<DocumentSnapshot> roomListener = new EventListener<DocumentSnapshot>() {
         @Override
         public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
             if (e != null) {
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-   private EventListener<QuerySnapshot> userListener =  new EventListener<QuerySnapshot>() {
+    private EventListener<QuerySnapshot> userListener = new EventListener<QuerySnapshot>() {
         @Override
         public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
             if (e != null) {
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
             num_users.setText(String.format("Num users: %d", documentSnapshots.size()));
 
             String nomUsuaris = "";
-            for(DocumentSnapshot doc : documentSnapshots){
+            for (DocumentSnapshot doc : documentSnapshots) {
                 nomUsuaris += doc.getString("name") + "\n";
             }
         }
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             polls.clear();
-            for(DocumentSnapshot doc : documentSnapshots) {
+            for (DocumentSnapshot doc : documentSnapshots) {
                 Poll poll = doc.toObject(Poll.class);
                 poll.setHash_question(doc.getId());
                 polls.add(poll);
@@ -114,10 +114,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         db.collection("rooms").document("testroom")
-                .addSnapshotListener(this,roomListener);
+                .addSnapshotListener(this, roomListener);
 
         db.collection("users").whereEqualTo("room", "testroom")
-                .addSnapshotListener(this,userListener);
+                .addSnapshotListener(this, userListener);
 
         db.collection("rooms").document("testroom").collection("polls")
                 .orderBy("start", Query.Direction.DESCENDING)
@@ -125,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onStart();
     }
-
 
 
     @Override
@@ -205,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState, outPersistentState);
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder {
         private TextView label_view;
         private TextView question_view;
         private TextView options_view;
@@ -220,50 +219,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class Adapter extends RecyclerView.Adapter<ViewHolder>
-    {
+    class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View itemView = getLayoutInflater().inflate(R.layout.pols_view,parent,false);
+            View itemView = getLayoutInflater().inflate(R.layout.pols_view, parent, false);
             return new ViewHolder(itemView);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Poll poll = polls.get(position);
-            if(position == 0)
-            {
+            if (position == 0) {
                 holder.label_view.setVisibility(View.VISIBLE);
-                if(poll.isOpen()) {
+                if (poll.isOpen()) {
                     holder.label_view.setText("Active");
                     vote_button.setTextColor(0xFF00AA00);
                     vote_button.setClickable(true);
-                }
-                else
-                {
+                } else {
                     holder.label_view.setText("Previous");
                     vote_button.setTextColor(0xFFAA0000);
                     vote_button.setClickable(false);
 
                 }
-            }
-            else
-            {
-                if(!poll.isOpen() && polls.get(position-1).isOpen())
-                {
+            } else {
+                if (!poll.isOpen() && polls.get(position - 1).isOpen()) {
                     holder.label_view.setVisibility(View.VISIBLE);
                     holder.label_view.setText("Previous");
-                }
-                else
-                {
+                } else {
                     holder.label_view.setVisibility(View.GONE);
                 }
             }
             holder.card_view.setCardElevation(poll.isOpen() ? 10.0f : 0.0f);
-            if(!poll.isOpen())
-            {
+            if (!poll.isOpen()) {
                 holder.card_view.setCardBackgroundColor(0xFFE0E0E0);
             }
             holder.question_view.setText(poll.getQuestion());
@@ -276,24 +265,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void OnClickButton(View view)
-    {
+    public void OnClickButton(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         String[] options = new String[polls.get(0).getOptions().size()];
         int i = 0;
-        for(String string: polls.get(0).getOptions()) {
+        for (String string : polls.get(0).getOptions()) {
             options[i] = string;
             ++i;
         }
         builder.setTitle(polls.get(0).getQuestion()).setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-            Map<String,Object> map = new HashMap<>();
-            map.put("pollid", polls.get(0).getHash_question());
-            map.put("option", which);
-            //TODO: revise this
-            db.collection("rooms").document("testroom").collection("votes").document(userId).set(map);
+                Map<String, Object> map = new HashMap<>();
+                map.put("pollid", polls.get(0).getHash_question());
+                map.put("option", which);
+                //TODO: revise this
+                db.collection("rooms").document("testroom").collection("votes").document(userId).set(map);
 
             }
         });
