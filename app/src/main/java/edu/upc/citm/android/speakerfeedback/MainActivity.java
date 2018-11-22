@@ -289,8 +289,11 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle(polls.get(0).getQuestion()).setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
-                
+            Map<String,Object> map = new HashMap<>();
+            map.put("pollid", polls.get(0).getHash_question());
+            map.put("option", which);
+            //TODO: revise this
+            db.collection("rooms").document("testroom").collection("votes").document(userId).set(map);
 
             }
         });
