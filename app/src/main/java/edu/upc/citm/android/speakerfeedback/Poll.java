@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 public class Poll {
-
+    private String hash_question;
     private String question;
     private List<String> options;
     private boolean open;
@@ -72,5 +72,13 @@ public class Poll {
 
     public void setResults(List<Integer> results) {
         this.results = results;
+    }
+
+    public String getHash_question() {
+        return hash_question;
+    }
+
+    public void setHash_question(String hash_question) {
+        this.hash_question = hash_question;
     }
 }
