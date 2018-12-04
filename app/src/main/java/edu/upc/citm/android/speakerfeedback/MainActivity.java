@@ -31,6 +31,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,9 +60,16 @@ public class MainActivity extends AppCompatActivity {
 
         num_users = findViewById(R.id.num_users_view);
         vote_button = findViewById(R.id.vote_btn);
+
+
         getOrRegisterUser();
+
         startFirestoreListenerService();
 
+    }
+
+    private void enterRoom() {
+        db.collection("users").document(userId).update("room", "testroom", "last_active", new Date());
     }
 
     private void startFirestoreListenerService()
@@ -89,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
 
     private EventListener<QuerySnapshot> userListener = new EventListener<QuerySnapshot>() {
         @Override
@@ -160,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
             // Ja està registrat, mostrem el id al Log
             Log.i("SpeakerFeedback", "userId = " + userId);
             //For Join roomtest
-            db.collection("users").document(userId).update("room", "testroom");
+           enterRoom();
         }
     }
 
@@ -194,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit()
                         .putString("userId", userId)
                         .commit();
+                enterRoom();
                 Log.i("SpeakerFeedback", "New user: userId = " + userId);
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -202,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("SpeakerFeedback", "Error creant objecte", e);
                 Toast.makeText(MainActivity.this,
                         "No s'ha pogut registrar l'usuari, intenta-ho més tard", Toast.LENGTH_SHORT).show();
-                db.collection("users").document(userId).update("room", "testroom");
                 finish();
             }
         });
