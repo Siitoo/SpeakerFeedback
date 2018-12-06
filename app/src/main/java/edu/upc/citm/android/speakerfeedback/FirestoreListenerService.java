@@ -12,6 +12,8 @@ import android.util.Log;
 
 public class FirestoreListenerService extends Service {
 
+    private boolean connected_to_firestone = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -22,8 +24,9 @@ public class FirestoreListenerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("SpeakerFeedback","FirestoreListenerService.onStartCommand");
-
-        createForegroundNotification();
+        
+        if(!connected_to_firestone)
+            createForegroundNotification();
 
         return START_NOT_STICKY;
     }
@@ -41,6 +44,8 @@ public class FirestoreListenerService extends Service {
                 .build();
 
         startForeground(1,notification);
+
+        connected_to_firestone = true;
     }
 
 
