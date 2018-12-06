@@ -24,7 +24,7 @@ public class FirestoreListenerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("SpeakerFeedback","FirestoreListenerService.onStartCommand");
-        
+
         if(!connected_to_firestone)
             createForegroundNotification();
 
