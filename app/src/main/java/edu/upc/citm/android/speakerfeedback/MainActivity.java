@@ -95,8 +95,16 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("SpeakerFeedback", "Error al rebre rooms/testroom", e);
                 return;
             }
-            String name = documentSnapshot.getString("name");
-            setTitle(name);
+
+            //TODO: This for now is well, but if speaker close room, user return to the "select room activity"
+            if(documentSnapshot.getBoolean("open") == false) {
+                stopFirestoreListenerService();
+                finish();
+            }
+            else {
+                String name = documentSnapshot.getString("name");
+                setTitle(name);
+            }
 
         }
     };
