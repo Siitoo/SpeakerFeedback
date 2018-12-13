@@ -72,13 +72,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void enterRoom() {
-        db.collection("users").document(userId).update("room", "testroom", "last_active", new Date());
+        db.collection("users").document(userId).update("room", "SitoTest2", "last_active", new Date());
     }
 
     private void startFirestoreListenerService()
     {
         Intent intent = new Intent(this,FirestoreListenerService.class);
-        intent.putExtra("room","testroom");
+        intent.putExtra("room","SitoTest2");
         startService(intent);
     }
 
@@ -147,13 +147,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        db.collection("rooms").document("testroom")
+        db.collection("rooms").document("SitoTest2")
                 .addSnapshotListener(this, roomListener);
 
-        db.collection("users").whereEqualTo("room", "testroom")
+        db.collection("users").whereEqualTo("room", "SitoTest2")
                 .addSnapshotListener(this, userListener);
 
-        db.collection("rooms").document("testroom").collection("polls")
+        db.collection("rooms").document("SitoTest2").collection("polls")
                 .orderBy("start", Query.Direction.DESCENDING)
                 .addSnapshotListener(this, pollsListener);
 
@@ -180,8 +180,14 @@ public class MainActivity extends AppCompatActivity {
             // Ja està registrat, mostrem el id al Log
             Log.i("SpeakerFeedback", "userId = " + userId);
             //For Join roomtest
-           enterRoom();
+            selectRoom();
+           //enterRoom();
         }
+    }
+
+    private void selectRoom() {
+        Intent intent = new Intent(this, EnterRoomID.class);
+        startActivity(intent);
     }
 
     @Override
@@ -315,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
                 map.put("pollid", polls.get(0).getHash_question());
                 map.put("option", which);
                 //TODO: revise this
-                db.collection("rooms").document("testroom").collection("votes").document(userId).set(map);
+                db.collection("rooms").document("SitoTest2").collection("votes").document(userId).set(map);
 
             }
         });
