@@ -97,12 +97,11 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            if(documentSnapshot.getBoolean("open") == false) {
+            if(!documentSnapshot.contains("open") || !documentSnapshot.getBoolean("open")) {
                 stopFirestoreListenerService();
                 db.collection("users").document(userId).update(
                                 "room", FieldValue.delete());
                 selectRoom();
-                finish();
             }
             else {
                 String name = documentSnapshot.getString("name");
