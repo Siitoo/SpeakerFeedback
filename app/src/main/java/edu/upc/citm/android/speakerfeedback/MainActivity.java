@@ -42,13 +42,18 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REGISTER_USER = 0;
+    private static final int INSERT_ROOM_ID = 1;
+
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     private TextView num_users;
     private String userId;
     private List<Poll> polls = new ArrayList<>();
     private Adapter adapter;
     private RecyclerView polls_views;
     private Button vote_button;
+
+    private String room_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,21 +69,17 @@ public class MainActivity extends AppCompatActivity {
         num_users = findViewById(R.id.num_users_view);
         vote_button = findViewById(R.id.vote_btn);
 
-
         getOrRegisterUser();
-
-        startFirestoreListenerService();
-
     }
 
     private void enterRoom() {
-        db.collection("users").document(userId).update("room", "SitoTest2", "last_active", new Date());
+        db.collection("users").document(userId).update("room", room_id, "last_active", new Date());
     }
 
     private void startFirestoreListenerService()
     {
         Intent intent = new Intent(this,FirestoreListenerService.class);
-        intent.putExtra("room","SitoTest2");
+        intent.putExtra("room",room_id);
         startService(intent);
     }
 
@@ -92,13 +93,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
             if (e != null) {
-                Log.e("SpeakerFeedback", "Error al rebre rooms/testroom", e);
+                Log.e("SpeakerFeedback", "Error al rebre rooms", e);
                 return;
             }
 
-            //TODO: This for now is well, but if speaker close room, user return to the "select room activity"
             if(documentSnapshot.getBoolean("open") == false) {
                 stopFirestoreListenerService();
+                db.collection("users").document(userId).update(
+                                "room", FieldValue.delete());
+                selectRoom();
                 finish();
             }
             else {
@@ -147,16 +150,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        db.collection("rooms").document("SitoTest2")
-                .addSnapshotListener(this, roomListener);
+        if(room_id == null)
+            selectRoom();
+        else {
 
-        db.collection("users").whereEqualTo("room", "SitoTest2")
-                .addSnapshotListener(this, userListener);
+            db.collection("rooms").document(room_id)
+                    .addSnapshotListener(this, roomListener);
 
-        db.collection("rooms").document("SitoTest2").collection("polls")
-                .orderBy("start", Query.Direction.DESCENDING)
-                .addSnapshotListener(this, pollsListener);
+            db.collection("users").whereEqualTo("room", room_id)
+                    .addSnapshotListener(this, userListener);
 
+            db.collection("rooms").document(room_id).collection("polls")
+                    .orderBy("start", Query.Direction.DESCENDING)
+                    .addSnapshotListener(this, pollsListener);
+        }
         super.onStart();
     }
 
@@ -179,15 +186,13 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // Ja està registrat, mostrem el id al Log
             Log.i("SpeakerFeedback", "userId = " + userId);
-            //For Join roomtest
-            selectRoom();
-           //enterRoom();
+
         }
     }
 
     private void selectRoom() {
         Intent intent = new Intent(this, EnterRoomID.class);
-        startActivity(intent);
+        startActivityForResult(intent,INSERT_ROOM_ID);
     }
 
     @Override
@@ -201,6 +206,11 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "Has de registrar un nom", Toast.LENGTH_SHORT).show();
                     finish();
                 }
+                break;
+            case INSERT_ROOM_ID:
+                room_id = data.getStringExtra("room_id");
+                startFirestoreListenerService();
+                enterRoom();
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
@@ -321,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
                 map.put("pollid", polls.get(0).getHash_question());
                 map.put("option", which);
                 //TODO: revise this
-                db.collection("rooms").document("SitoTest2").collection("votes").document(userId).set(map);
+                db.collection("rooms").document(room_id).collection("votes").document(userId).set(map);
 
             }
         });
@@ -345,8 +355,9 @@ public class MainActivity extends AppCompatActivity {
         {
             case R.id.logout_item:
                 stopFirestoreListenerService();
-                finish();
-                break;
+                db.collection("users").document(userId).update("room", FieldValue.delete());
+                selectRoom();
+            break;
         }
 
         return true;

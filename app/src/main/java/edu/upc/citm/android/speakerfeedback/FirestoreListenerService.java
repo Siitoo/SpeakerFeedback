@@ -18,7 +18,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class FirestoreListenerService extends Service {
 
-    private boolean connected_to_firestone = false;
+    private boolean connected_to_firestore = false;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
@@ -30,33 +30,40 @@ public class FirestoreListenerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("SpeakerFeedback","FirestoreListenerService.onStartCommand");
+        Log.i("SpeakerFeedback", "FirestoreListenerService.onStartCommand");
 
-        if(!connected_to_firestone)
-            createForegroundNotification();
+        if(!connected_to_firestore)
+        {
+            String roomID = intent.getStringExtra("room");
 
-        db.collection("rooms").document("testroom")
-                .collection("polls").whereEqualTo("open", true)
-                .addSnapshotListener(polls_listener);
+            if (!roomID.isEmpty())
+            {
+                db.collection("rooms").document(roomID)
+                        .collection("polls").whereEqualTo("open", true)
+                        .addSnapshotListener(polls_listener);
 
+                createForegroundNotification(roomID);
+                connected_to_firestore = true;
+            }
+        }
         return START_NOT_STICKY;
     }
 
-    private void createForegroundNotification() {
+    private void createForegroundNotification(String room_id) {
         Intent intent = new Intent(this,MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,0);
 
 
         //Crear una notificacion i cridar start Foreground (perque el servei segueixi funcionant)
         Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
-                .setContentTitle(String.format("Connectat a 'testroom"))
+                .setContentTitle(String.format("Connectat a " + room_id))
                 .setSmallIcon(R.drawable.ic_message)
                 .setContentIntent(pendingIntent)
                 .build();
 
         startForeground(1,notification);
 
-        connected_to_firestone = true;
+        connected_to_firestore = true;
     }
 
 
