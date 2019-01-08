@@ -1,5 +1,6 @@
 package edu.upc.citm.android.speakerfeedback;
 
+import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -54,11 +55,13 @@ public class MainActivity extends AppCompatActivity {
 
     private String room_id;
 
+    private App app;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        app = (App)getApplication();
         adapter = new Adapter();
 
         polls_views = findViewById(R.id.polsView);
@@ -67,8 +70,13 @@ public class MainActivity extends AppCompatActivity {
 
         num_users = findViewById(R.id.num_users_view);
         vote_button = findViewById(R.id.vote_btn);
-
         getOrRegisterUser();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        app.Save();
     }
 
     private void enterRoom() {

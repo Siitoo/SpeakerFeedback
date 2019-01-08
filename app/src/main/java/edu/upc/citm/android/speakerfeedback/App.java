@@ -43,17 +43,18 @@ public class App extends Application {
 
     @Override
     public void onCreate() {
-        super.onCreate();
+
         recent_rooms = new ArrayList<>();
         loadRecentRoomsList();
         createNotificationChannels();
+        super.onCreate();
     }
 
-    @Override
-    public void onTerminate() {
+    public void Save()
+    {
         saveRecentRoomList();
-        super.onTerminate();
     }
+
 
     private void createNotificationChannels() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -113,7 +114,7 @@ public class App extends Application {
 
     private void loadRecentRoomsList() {
         try {
-            FileInputStream inputStream = openFileInput("recentRoomsList.txt");
+            FileInputStream inputStream = openFileInput("recentRoomList.txt");
             InputStreamReader reader = new InputStreamReader(inputStream);
             Scanner scanner = new Scanner(reader);
             while (scanner.hasNextLine()) {
