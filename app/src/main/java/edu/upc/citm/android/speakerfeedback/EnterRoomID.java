@@ -180,7 +180,12 @@ public class EnterRoomID extends AppCompatActivity {
                                 if (documentSnapshot.contains("open") && documentSnapshot.getBoolean("open")) {
                                     //TEST
                                     enter_room_id.setText(room.getId());
-                                    onClickEnterRoom(itemView);
+                                    Intent data = new Intent();
+                                    data.putExtra("room_id", enter_room_id.getText().toString());
+                                    setResult(RESULT_OK, data);
+                                    App.Room room_i = new App.Room(documentSnapshot.getString("name"), room.getId().toString());
+                                    app.addRecentRoom(room_i);
+                                    finish();
                                 }
                                 else {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(EnterRoomID.this);
