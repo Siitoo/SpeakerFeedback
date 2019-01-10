@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         num_users = findViewById(R.id.num_users_view);
         vote_button = findViewById(R.id.vote_btn);
         getOrRegisterUser();
+        selectRoom();
     }
 
     @Override
@@ -156,9 +157,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        if(room_id == null)
-            selectRoom();
-        else {
+        if(room_id != null)
+        {
 
             db.collection("rooms").document(room_id)
                     .addSnapshotListener(this, roomListener);
@@ -189,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, RegisterUserActivity.class);
             startActivityForResult(intent, REGISTER_USER);
             Toast.makeText(this, "Encara t'has de registrar", Toast.LENGTH_SHORT).show();
+           // finish();
         } else {
             // Ja està registrat, mostrem el id al Log
             Log.i("SpeakerFeedback", "userId = " + userId);
@@ -236,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit()
                         .putString("userId", userId)
                         .commit();
-                enterRoom();
+               enterRoom();
                 Log.i("SpeakerFeedback", "New user: userId = " + userId);
             }
         }).addOnFailureListener(new OnFailureListener() {
